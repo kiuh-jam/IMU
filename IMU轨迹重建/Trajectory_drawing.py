@@ -139,18 +139,33 @@ def plot_z_v(velocity):
 
 def plot_v(velocity):
 
-    velocity = np.array(velocity)
-    plt.figure(figsize=(10, 6))
+    """
+    绘制三轴加速度数据
+    acc_data: 包含x,y,z加速度的二维数组，shape=(N,3)
+    """
+    acc_data = np.array(velocity)
+    plt.figure(figsize=(12, 8))
     
-    # 绘制三条速度曲线
-    plt.plot(velocity[:, 0], 'r-', linewidth=2, label='X轴速度')
-    plt.plot(velocity[:, 1], 'g-', linewidth=2, label='Y轴速度') 
-    plt.plot(velocity[:, 2], 'b-', linewidth=2, label='Z轴速度')
-    plt.xlabel('时间步长', fontsize=12)
-    plt.ylabel('速度 (m/s)', fontsize=12)
-    plt.title('XYZ轴速度曲线', fontsize=14)
-    plt.grid(True, linestyle='--', alpha=0.6)
-    plt.legend(fontsize=10)
+    # X轴加速度
+    plt.subplot(3, 1, 1)
+    plt.plot(acc_data[:, 0], 'r-', linewidth=1)
+    plt.ylabel('X速度 (m/s)')
+    plt.title('三轴速度数据')
+    plt.grid(True)
+    
+    # Y轴加速度
+    plt.subplot(3, 1, 2)
+    plt.plot(acc_data[:, 1], 'g-', linewidth=1)
+    plt.ylabel('Y速度 (m/s)')
+    plt.grid(True)
+    
+    # Z轴加速度
+    plt.subplot(3, 1, 3)
+    plt.plot(acc_data[:, 2], 'b-', linewidth=1)
+    plt.ylabel('Z速度 (m/s)')
+    plt.xlabel('时间步长')
+    plt.grid(True)
+    
     plt.tight_layout()
     plt.show()
 
@@ -210,6 +225,37 @@ def plot_gyro(gyro_data):
     plt.subplot(3, 1, 3)
     plt.plot(gyro_data[:, 2], 'b-', linewidth=1)
     plt.ylabel('Z角速度 (m/s^2)')
+    plt.xlabel('时间步长')
+    plt.grid(True)
+    
+    plt.tight_layout()
+    plt.show()
+
+def xyz_position(position):
+    """
+    绘制三轴加速度数据
+    acc_data: 包含x,y,z加速度的二维数组，shape=(N,3)
+    """
+    acc_data = np.array(position)
+    plt.figure(figsize=(12, 8))
+    
+    # X轴加速度
+    plt.subplot(3, 1, 1)
+    plt.plot(acc_data[:, 0], 'r-', linewidth=1)
+    plt.ylabel('X (m)')
+    plt.title('三轴位置数据')
+    plt.grid(True)
+    
+    # Y轴加速度
+    plt.subplot(3, 1, 2)
+    plt.plot(acc_data[:, 1], 'g-', linewidth=1)
+    plt.ylabel('Y (m)')
+    plt.grid(True)
+    
+    # Z轴加速度
+    plt.subplot(3, 1, 3)
+    plt.plot(acc_data[:, 2], 'b-', linewidth=1)
+    plt.ylabel('Z (m)')
     plt.xlabel('时间步长')
     plt.grid(True)
     

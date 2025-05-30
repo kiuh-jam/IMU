@@ -86,13 +86,13 @@ def EKF_func(acc_data):
 # 使用示例
 if __name__ == '__main__':
     # 加载加速度数据(替换为您的实际数据路径)
-    file_path = r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\IMU去噪算法\深度学习方法\LSTM-RNN\data\Accelerometer.csv'
+    file_path = r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\github\IMU去噪算法\深度学习方法\LSTM-RNN\data\Accelerometer.csv'
     data = pd.read_csv(file_path)
     acc_x = data['Acceleration x (m/s^2)'].values
     
     # 创建并运行EKF
     ekf = EKF_Acceleration(acc_x)
-    positions, velocities = ekf.process(dt=0.01)  # 假设采样率为100Hz
+    positions, velocities = ekf.process(dt=1/400)  # 假设采样率为100Hz
     
     # 绘制结果
     plt.figure(figsize=(12, 6))

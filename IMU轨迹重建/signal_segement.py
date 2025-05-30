@@ -1,17 +1,35 @@
+"""
+process_imu_folder.py
+功能：
+    1. 读取包含多个IMU CSV文件的文件夹。
+    2. 处理每个IMU数据文件对 提取加速度和陀螺仪数据。
+    3. 对加速度和陀螺仪数据进行处理，计算均值和标准差。
+    4. 统计不同温度下的加速度和陀螺仪数据的均值和标准差。
+返回：
+    温度值列表、加速度均值列表、加速度标准差列表、陀螺仪均值列表、陀螺仪标准差列表。
+
+plot_imu_statistics
+功能：
+    1. 绘制不同温度下的IMU数据的统计图表 包括加速度和陀螺仪的均值和标准差。
+返回：
+    绘制的图表。
+
+
+
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from IMU import CsvImuFileLoader
+# from IMU import CsvImuFileLoader
 import deviation
 import Trajectory_drawing as TD
 import Quaternion_inertial_navigation as QIN
-from ellipsoid_fit import ellipsoid_fit, ellipsoid_plot, data_regularize
-import ellipsoid
 import os
 import change_point
 import sys
-sys.path.append(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\IMU去噪算法\深度学习方法\GRU')
-sys.path.append(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\IMU去噪算法\传统方法')
+sys.path.append(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\github\IMU去噪算法\深度学习方法\GRU')
+sys.path.append(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\github\IMU去噪算法\传统方法')
 import EKF.EKF as EKF
 import EMD_WT.WT as WT
 import LSTM_GRU
@@ -22,6 +40,7 @@ def process_imu_folder(folder_path):
     """
     处理包含多个IMU CSV文件的文件夹
     folder_path: 包含Accelerometer*.csv和Gyroscope*.csv文件的文件夹路径
+    返回：不同温度下的加速度均值、标准差、陀螺仪均值、标准差
     """
     acc_mean = []
     gyro_mean = []
@@ -38,7 +57,7 @@ def process_imu_folder(folder_path):
         # 处理两种格式: Accelerometer-10.csv (-10度) 和 Accelerometer10.csv (10度)
         temp_str = filename.split('.')[0].replace('Accelerometer', '').replace('Gyroscope', '')
         return int(temp_str)  # 转换为整数
-    
+
     # 创建文件温度映射
     acc_file_map = {extract_temperature(f): f for f in acc_files}
     gyro_file_map = {extract_temperature(f): f for f in gyro_files}
@@ -164,38 +183,38 @@ def process_signal_segments(data, A, process_even_func, process_odd_func, save_p
 
     return process_data
 
-def example_odd_processor(segments):
-    # 将segments分成10份处理 这里是因为使用了LSTM-GRU模型来处理静止数据，输入数据过大所以分成10份 可自行修改
-    segment_length = len(segments)
-    chunk_size = segment_length // 10 # 数据分成10块
-    processed_chunks = []
-
-    for i in range(0, segment_length, chunk_size):
-        chunk = segments[i:i+chunk_size]
-        # 处理每个chunk
-        data_x = torch.tensor(np.array(chunk), dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
-        model = LSTM_GRU.LSTM_GRU(data_x, [1]*20, step=20)
-        # 加载已经训练好的模型参数
-        model.load_state_dict(torch.load(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\IMU去噪算法\深度学习方法\GRU\model.pth'))
-        model.eval()
-        model.to(device='cpu')
-        out_x = model.forward((torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32), 
-                             torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32)))
-        processed_chunks.append(out_x.view(-1).detach().numpy())
-
-    # 拼接处理后的chunks
-    return np.concatenate(processed_chunks)
-
 # def example_odd_processor(segments):
-#     # 这里替换为您的实际处理函数
-#     data_x = torch.tensor(np.array(segments), dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
-#     model = LSTM_GRU.LSTM_GRU(data_x, [1]*20, step=20)
-#     model.load_state_dict(torch.load(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\IMU去噪算法\深度学习方法\GRU\model.pth'))
-#     model.eval()
-#     model.to(device='cpu')
-#     out_x = model.forward((torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32), 
-#                           torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32)))
-#     return out_x.view(-1).detach().numpy()
+#     # 将segments分成10份处理 这里是因为使用了LSTM-GRU模型来处理静止数据，输入数据过大所以分成10份 可自行修改
+#     segment_length = len(segments)
+#     chunk_size = segment_length // 10 # 数据分成10块
+#     processed_chunks = []
+
+#     for i in range(0, segment_length, chunk_size):
+#         chunk = segments[i:i+chunk_size]
+#         # 处理每个chunk
+#         data_x = torch.tensor(np.array(chunk), dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
+#         model = LSTM_GRU.LSTM_GRU(data_x, [1]*20, step=20)
+#         # 加载已经训练好的模型参数
+#         model.load_state_dict(torch.load(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\IMU去噪算法\深度学习方法\GRU\model.pth'))
+#         model.eval()
+#         model.to(device='cpu')
+#         out_x = model.forward((torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32), 
+#                              torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32)))
+#         processed_chunks.append(out_x.view(-1).detach().numpy())
+
+#     # 拼接处理后的chunks
+#     return np.concatenate(processed_chunks)
+
+def example_odd_processor(segments):
+    # 这里替换为您的实际处理函数
+    data_x = torch.tensor(np.array(segments), dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
+    model = LSTM_GRU.LSTM_GRU(data_x, [1]*20, step=20)
+    model.load_state_dict(torch.load(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\github\IMU去噪算法\深度学习方法\GRU\model.pth'))
+    model.eval()
+    model.to(device='cpu')
+    out_x = model.forward((torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32), 
+                          torch.zeros(1, data_x.shape[0],model.h_size_list[0], dtype=torch.float32)))
+    return out_x.view(-1).detach().numpy()
 
 def example_even_processor_EKF(segments):
     # 这里替换为您的实际处理函数

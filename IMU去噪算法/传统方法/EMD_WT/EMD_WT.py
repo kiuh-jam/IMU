@@ -1,9 +1,11 @@
 # 根据论文实现算法EMD-WT
 # 《High-G Calibration Denoising Method for High-G MEMS Accelerometer Based on EMD and Wavelet Threshold》
 # 该算法的基本思想是先利用EMD将信号分解为多个IMU分量 对特定的高频IMF分量使用WT去噪 低频保持不变 随后重建信号
-import EMD
+import sys
+sys.path.append(r'C:\Users\13106\Desktop\code\IMU\MyIMUCode\github\IMU去噪算法\传统方法')
+import EMD_WT.EMD as EMD
 import numpy as np
-import WT
+import EMD_WT.WT as WT
 import pandas as pd
 import matplotlib.pyplot as plt
 # 设置支持中文的字体，SimHei 是常见的中文字体
